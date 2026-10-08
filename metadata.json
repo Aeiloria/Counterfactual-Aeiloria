@@ -1,0 +1,7 @@
+{
+  "name": "Counterfactual Branch Comparator",
+  "description": "Downstream simulation pipeline analyzer evaluating multi-branch parallel worlds and historical state outputs against the sealed reference specification for Freedom.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+
