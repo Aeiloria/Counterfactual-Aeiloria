@@ -139,6 +139,22 @@ export interface BranchSensitivityMetric {
   perturbation_pct: number;
 }
 
+export interface CriticalThresholdAlert {
+  id: string;
+  branch_id: string;
+  branch_name: string;
+  branch_color: string;
+  step: number;
+  trigger_type: 'floor_breach' | 'rapid_collapse' | 'extinction_terminal';
+  score: number;
+  threshold: number;
+  prior_score?: number;
+  deficit_summary: string;
+  severity: 'critical' | 'emergency';
+  timestamp: string;
+  acknowledged?: boolean;
+}
+
 export interface SimulationScenario {
   id: string;
   title: string;

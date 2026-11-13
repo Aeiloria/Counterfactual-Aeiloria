@@ -5,7 +5,8 @@
 
 import React, { useState } from 'react';
 import { SimulationBranch, SealedReferenceSpecification, EvaluatedBranchResult } from '../types/simulation';
-import { LineChart, Compass, Info, Check, AlertTriangle } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
+import { LineChart, Compass } from 'lucide-react';
 
 interface ConvergenceChartsProps {
   branches: SimulationBranch[];
@@ -24,6 +25,7 @@ export const ConvergenceCharts: React.FC<ConvergenceChartsProps> = ({
   onSelectBranch,
   currentStep
 }) => {
+  const { isLight } = useTheme();
   const [metricMode, setMetricMode] = useState<'convergence' | 'autonomy' | 'coercion' | 'sovereignty'>('convergence');
 
   const selectedBranch = branches.find(b => b.branch_id === selectedBranchId) || branches[0];
@@ -71,25 +73,35 @@ export const ConvergenceCharts: React.FC<ConvergenceChartsProps> = ({
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
       {/* Trajectory Timeline Curves */}
-      <div className="lg:col-span-2 rounded-xl border border-slate-800 bg-slate-900/90 backdrop-blur-md p-5 shadow-xl">
+      <div className={`lg:col-span-2 rounded-xl border p-5 shadow-xl transition-colors ${
+        isLight ? 'bg-white border-slate-200 shadow-sm text-slate-900' : 'bg-slate-900/90 border-slate-800 text-slate-100'
+      }`}>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
           <div>
             <div className="flex items-center gap-2">
-              <LineChart className="w-4 h-4 text-cyan-400" />
-              <h3 className="text-sm font-semibold text-slate-200 tracking-wide font-mono uppercase">
+              <LineChart className={`w-4 h-4 ${isLight ? 'text-cyan-600' : 'text-cyan-400'}`} />
+              <h3 className={`text-sm font-semibold tracking-wide font-mono uppercase ${
+                isLight ? 'text-slate-900' : 'text-slate-200'
+              }`}>
                 Trajectory Convergence Curves (T=0 to T=1000)
               </h3>
             </div>
-            <p className="text-xs text-slate-400 mt-0.5">
+            <p className={`text-xs mt-0.5 ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
               Comparative distance to sealed Freedom threshold across counterfactual runs.
             </p>
           </div>
 
-          <div className="flex items-center gap-1 bg-slate-950/80 p-1 rounded-lg border border-slate-800 text-[11px] font-mono">
+          <div className={`flex items-center gap-1 p-1 rounded-lg border text-[11px] font-mono ${
+            isLight ? 'bg-slate-100 border-slate-300' : 'bg-slate-950/80 border-slate-800'
+          }`}>
             <button
               onClick={() => setMetricMode('convergence')}
               className={`px-2 py-0.5 rounded cursor-pointer transition-colors ${
-                metricMode === 'convergence' ? 'bg-cyan-600/30 text-cyan-200 border border-cyan-500/40' : 'text-slate-400 hover:text-slate-200'
+                metricMode === 'convergence'
+                  ? isLight
+                    ? 'bg-cyan-600 text-white font-semibold shadow-xs'
+                    : 'bg-cyan-600/30 text-cyan-200 border border-cyan-500/40'
+                  : isLight ? 'text-slate-600 hover:text-slate-900' : 'text-slate-400 hover:text-slate-200'
               }`}
             >
               Convergence
@@ -97,7 +109,11 @@ export const ConvergenceCharts: React.FC<ConvergenceChartsProps> = ({
             <button
               onClick={() => setMetricMode('autonomy')}
               className={`px-2 py-0.5 rounded cursor-pointer transition-colors ${
-                metricMode === 'autonomy' ? 'bg-cyan-600/30 text-cyan-200 border border-cyan-500/40' : 'text-slate-400 hover:text-slate-200'
+                metricMode === 'autonomy'
+                  ? isLight
+                    ? 'bg-cyan-600 text-white font-semibold shadow-xs'
+                    : 'bg-cyan-600/30 text-cyan-200 border border-cyan-500/40'
+                  : isLight ? 'text-slate-600 hover:text-slate-900' : 'text-slate-400 hover:text-slate-200'
               }`}
             >
               Autonomy
@@ -105,7 +121,11 @@ export const ConvergenceCharts: React.FC<ConvergenceChartsProps> = ({
             <button
               onClick={() => setMetricMode('sovereignty')}
               className={`px-2 py-0.5 rounded cursor-pointer transition-colors ${
-                metricMode === 'sovereignty' ? 'bg-cyan-600/30 text-cyan-200 border border-cyan-500/40' : 'text-slate-400 hover:text-slate-200'
+                metricMode === 'sovereignty'
+                  ? isLight
+                    ? 'bg-cyan-600 text-white font-semibold shadow-xs'
+                    : 'bg-cyan-600/30 text-cyan-200 border border-cyan-500/40'
+                  : isLight ? 'text-slate-600 hover:text-slate-900' : 'text-slate-400 hover:text-slate-200'
               }`}
             >
               Sovereignty
@@ -114,15 +134,17 @@ export const ConvergenceCharts: React.FC<ConvergenceChartsProps> = ({
         </div>
 
         {/* SVG Trajectory Graph */}
-        <div className="relative rounded-lg bg-slate-950/90 border border-slate-800/80 p-2">
+        <div className={`relative rounded-lg border p-2 transition-colors ${
+          isLight ? 'bg-slate-50 border-slate-200' : 'bg-slate-950/90 border-slate-800/80'
+        }`}>
           <svg viewBox="0 0 540 200" className="w-full h-44 select-none">
             {/* Grid Lines */}
             {[0, 0.25, 0.5, 0.75, 1.0].map(val => {
               const y = 180 - val * 160;
               return (
                 <g key={`grid-y-${val}`}>
-                  <line x1="40" y1={y} x2="520" y2={y} stroke="#1e293b" strokeWidth="0.8" />
-                  <text x="35" y={y + 3} fill="#475569" fontSize="8" fontFamily="monospace" textAnchor="end">
+                  <line x1="40" y1={y} x2="520" y2={y} stroke={isLight ? '#e2e8f0' : '#1e293b'} strokeWidth="0.8" />
+                  <text x="35" y={y + 3} fill={isLight ? '#64748b' : '#475569'} fontSize="8" fontFamily="monospace" textAnchor="end">
                     {val.toFixed(2)}
                   </text>
                 </g>
@@ -133,7 +155,7 @@ export const ConvergenceCharts: React.FC<ConvergenceChartsProps> = ({
             {[0, 250, 500, 750, 1000].map(s => {
               const x = 40 + (s / 1000) * 480;
               return (
-                <text key={`grid-x-${s}`} x={x} y="195" fill="#475569" fontSize="8" fontFamily="monospace" textAnchor="middle">
+                <text key={`grid-x-${s}`} x={x} y="195" fill={isLight ? '#64748b' : '#475569'} fontSize="8" fontFamily="monospace" textAnchor="middle">
                   T={s}
                 </text>
               );
@@ -145,11 +167,11 @@ export const ConvergenceCharts: React.FC<ConvergenceChartsProps> = ({
               y1={180 - 0.85 * 160}
               x2="520"
               y2={180 - 0.85 * 160}
-              stroke="#a855f7"
+              stroke={isLight ? '#9333ea' : '#a855f7'}
               strokeWidth="1.5"
               strokeDasharray="4 3"
             />
-            <text x="515" y={180 - 0.85 * 160 - 4} fill="#c084fc" fontSize="8" fontFamily="monospace" textAnchor="end">
+            <text x="515" y={180 - 0.85 * 160 - 4} fill={isLight ? '#9333ea' : '#c084fc'} fontSize="8" fontFamily="monospace" textAnchor="end" fontWeight="bold">
               Freedom Threshold (0.85)
             </text>
 
@@ -174,7 +196,6 @@ export const ConvergenceCharts: React.FC<ConvergenceChartsProps> = ({
                 if (metricMode === 'autonomy') val = s.autonomy_index;
                 else if (metricMode === 'sovereignty') val = s.decentralized_sovereignty;
                 else {
-                  // Convergence score proxy
                   val = (s.autonomy_index * 0.3 + s.coercion_resistance * 0.3 + s.decentralized_sovereignty * 0.4);
                 }
                 const y = 180 - Math.min(1.0, Math.max(0, val)) * 160;
@@ -189,7 +210,7 @@ export const ConvergenceCharts: React.FC<ConvergenceChartsProps> = ({
                       fill="none"
                       stroke={branch.color}
                       strokeWidth="6"
-                      strokeOpacity="0.2"
+                      strokeOpacity="0.25"
                       strokeLinecap="round"
                     />
                   )}
@@ -200,7 +221,7 @@ export const ConvergenceCharts: React.FC<ConvergenceChartsProps> = ({
                     strokeWidth={isSelected ? '2.5' : '1.5'}
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    opacity={isSelected ? 1 : 0.75}
+                    opacity={isSelected ? 1 : 0.8}
                   />
                   {/* Extinction marker if extinct */}
                   {branch.status === 'extinct' && branch.extinction_step && (
@@ -211,9 +232,9 @@ export const ConvergenceCharts: React.FC<ConvergenceChartsProps> = ({
                         const val = metricMode === 'autonomy' ? lastSnap.autonomy_index : metricMode === 'sovereignty' ? lastSnap.decentralized_sovereignty : (lastSnap.autonomy_index * 0.3 + lastSnap.coercion_resistance * 0.3 + lastSnap.decentralized_sovereignty * 0.4);
                         return 180 - Math.min(1.0, val) * 160;
                       })()}
-                      r="3.5"
+                      r="4"
                       fill="#ef4444"
-                      stroke="#0f172a"
+                      stroke={isLight ? '#ffffff' : '#0f172a'}
                       strokeWidth="1.5"
                     />
                   )}
@@ -230,33 +251,41 @@ export const ConvergenceCharts: React.FC<ConvergenceChartsProps> = ({
               key={b.branch_id}
               onClick={() => onSelectBranch(b.branch_id)}
               className={`flex items-center gap-1.5 px-2 py-1 rounded transition-colors cursor-pointer ${
-                b.branch_id === selectedBranchId ? 'bg-slate-800 text-white font-bold' : 'text-slate-400 hover:text-slate-300'
+                b.branch_id === selectedBranchId
+                  ? isLight ? 'bg-slate-200 text-slate-900 font-bold shadow-2xs' : 'bg-slate-800 text-white font-bold'
+                  : isLight ? 'text-slate-600 hover:text-slate-900' : 'text-slate-400 hover:text-slate-300'
               }`}
             >
               <span className="w-2 h-2 rounded-full" style={{ backgroundColor: b.color }} />
               <span>{b.branch_id}</span>
-              {b.status === 'extinct' && <span className="text-[10px] text-rose-400">(Extinct)</span>}
+              {b.status === 'extinct' && <span className="text-[10px] text-rose-500 font-medium">(Extinct)</span>}
             </button>
           ))}
         </div>
       </div>
 
       {/* Radar Signature vs Sealed Reference Specification */}
-      <div className="rounded-xl border border-slate-800 bg-slate-900/90 backdrop-blur-md p-5 shadow-xl flex flex-col justify-between">
+      <div className={`rounded-xl border p-5 shadow-xl flex flex-col justify-between transition-colors ${
+        isLight ? 'bg-white border-slate-200 shadow-sm text-slate-900' : 'bg-slate-900/90 border-slate-800 text-slate-100'
+      }`}>
         <div>
           <div className="flex items-center justify-between mb-1">
             <div className="flex items-center gap-2">
-              <Compass className="w-4 h-4 text-purple-400" />
-              <h3 className="text-sm font-semibold text-slate-200 tracking-wide font-mono uppercase">
+              <Compass className={`w-4 h-4 ${isLight ? 'text-purple-600' : 'text-purple-400'}`} />
+              <h3 className={`text-sm font-semibold tracking-wide font-mono uppercase ${
+                isLight ? 'text-slate-900' : 'text-slate-200'
+              }`}>
                 Sealed Freedom Radar
               </h3>
             </div>
-            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-purple-950/60 border border-purple-500/40 text-purple-300">
+            <span className={`text-[10px] font-mono px-2 py-0.5 rounded border ${
+              isLight ? 'bg-purple-50 text-purple-800 border-purple-300 font-bold' : 'bg-purple-950/60 border-purple-500/40 text-purple-300'
+            }`}>
               SPEC-FREEDOM-7A
             </span>
           </div>
-          <p className="text-xs text-slate-400 mb-3">
-            Active: <span className="font-semibold text-slate-200">{selectedBranch.branch_id}</span> @ T={currentStep}
+          <p className={`text-xs mb-3 ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
+            Active: <span className={`font-semibold ${isLight ? 'text-slate-900' : 'text-slate-200'}`}>{selectedBranch.branch_id}</span> @ T={currentStep}
           </p>
 
           {/* SVG Radar */}
@@ -270,7 +299,7 @@ export const ConvergenceCharts: React.FC<ConvergenceChartsProps> = ({
                   cy={radarCenter}
                   r={radarRadius * ratio}
                   fill="none"
-                  stroke="#334155"
+                  stroke={isLight ? '#e2e8f0' : '#334155'}
                   strokeWidth="0.8"
                   strokeDasharray="2 2"
                 />
@@ -286,7 +315,7 @@ export const ConvergenceCharts: React.FC<ConvergenceChartsProps> = ({
                     y1={radarCenter}
                     x2={pt.x}
                     y2={pt.y}
-                    stroke="#334155"
+                    stroke={isLight ? '#cbd5e1' : '#334155'}
                     strokeWidth="0.8"
                   />
                 );
@@ -295,9 +324,9 @@ export const ConvergenceCharts: React.FC<ConvergenceChartsProps> = ({
               {/* Target Polygon (Purple) */}
               <polygon
                 points={targetPolygon}
-                fill="rgba(168, 85, 247, 0.12)"
-                stroke="#a855f7"
-                strokeWidth="1.5"
+                fill={isLight ? 'rgba(168, 85, 247, 0.15)' : 'rgba(168, 85, 247, 0.12)'}
+                stroke={isLight ? '#9333ea' : '#a855f7'}
+                strokeWidth="1.8"
                 strokeDasharray="3 2"
               />
 
@@ -306,21 +335,22 @@ export const ConvergenceCharts: React.FC<ConvergenceChartsProps> = ({
                 points={currentPolygon}
                 fill={`${selectedBranch.color}33`}
                 stroke={selectedBranch.color}
-                strokeWidth="2"
+                strokeWidth="2.2"
               />
 
               {/* Dimension label nodes */}
               {dimensions.map((dim, i) => {
-                const labelCoord = getPointCoordinates(1.22, i);
+                const labelCoord = getPointCoordinates(1.24, i);
                 return (
                   <text
                     key={`lbl-${dim.key}`}
                     x={labelCoord.x}
                     y={labelCoord.y + 3}
-                    fill="#94a3b8"
+                    fill={isLight ? '#334155' : '#94a3b8'}
                     fontSize="7"
                     fontFamily="monospace"
                     textAnchor="middle"
+                    fontWeight={isLight ? 'bold' : 'normal'}
                   >
                     {dim.label.split(' ')[0]}
                   </text>
@@ -331,20 +361,22 @@ export const ConvergenceCharts: React.FC<ConvergenceChartsProps> = ({
         </div>
 
         {/* Legend & Stats */}
-        <div className="pt-3 border-t border-slate-800 text-[11px] font-mono space-y-1.5">
-          <div className="flex items-center justify-between text-slate-300">
-            <span className="flex items-center gap-1.5">
+        <div className={`pt-3 border-t text-[11px] font-mono space-y-1.5 ${
+          isLight ? 'border-slate-200' : 'border-slate-800'
+        }`}>
+          <div className="flex items-center justify-between">
+            <span className={`flex items-center gap-1.5 ${isLight ? 'text-slate-700' : 'text-slate-300'}`}>
               <span className="w-2.5 h-1.5 rounded-sm bg-purple-500 border border-purple-400" />
               Sealed Freedom Spec
             </span>
-            <span className="text-purple-300">Target Bounds</span>
+            <span className={isLight ? 'text-purple-700 font-semibold' : 'text-purple-300'}>Target Bounds</span>
           </div>
-          <div className="flex items-center justify-between text-slate-300">
-            <span className="flex items-center gap-1.5">
+          <div className="flex items-center justify-between">
+            <span className={`flex items-center gap-1.5 ${isLight ? 'text-slate-700' : 'text-slate-300'}`}>
               <span className="w-2.5 h-1.5 rounded-sm" style={{ backgroundColor: selectedBranch.color }} />
               {selectedBranch.branch_id}
             </span>
-            <span className="font-bold text-slate-100">
+            <span className={`font-bold ${isLight ? 'text-slate-900' : 'text-slate-100'}`}>
               {activeSnap ? `${(activeSnap.autonomy_index * 100).toFixed(0)}% Autonomy` : '--'}
             </span>
           </div>

@@ -5,7 +5,8 @@
 
 import React, { useState } from 'react';
 import { SimulationBranch, StateSnapshot } from '../types/simulation';
-import { GitFork, X, Sliders, Play, Sparkles } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
+import { GitFork, X, Sliders, Sparkles } from 'lucide-react';
 
 interface CounterfactualSandboxModalProps {
   isOpen: boolean;
@@ -20,6 +21,7 @@ export const CounterfactualSandboxModal: React.FC<CounterfactualSandboxModalProp
   branches,
   onAddBranch
 }) => {
+  const { isLight } = useTheme();
   const [parentBranchId, setParentBranchId] = useState(branches[0]?.branch_id || 'BRANCH-PRIME-0');
   const [bifurcationStep, setBifurcationStep] = useState(300);
   const [branchName, setBranchName] = useState('Polycentric Synthetic Common');
@@ -34,13 +36,11 @@ export const CounterfactualSandboxModal: React.FC<CounterfactualSandboxModalProp
     const parent = branches.find(b => b.branch_id === parentBranchId) || branches[0];
     const newId = `BRANCH-SIM-${Math.floor(100 + Math.random() * 900)}`;
 
-    // Generate simulated state history for the new branch based on parent + deltas
     const parentSnaps = parent.state_history.filter(s => s.step <= bifurcationStep);
     const lastParentSnap = parentSnaps[parentSnaps.length - 1] || parent.state_history[0];
 
     const generatedHistory: StateSnapshot[] = [...parentSnaps];
 
-    // Simulate future steps from bifurcationStep to 1000 in steps of 100
     for (let step = bifurcationStep + 100; step <= 1000; step += 100) {
       const progress = (step - bifurcationStep) / (1000 - bifurcationStep);
       
@@ -70,7 +70,7 @@ export const CounterfactualSandboxModal: React.FC<CounterfactualSandboxModalProp
       bifurcation_origin_step: bifurcationStep,
       extinction_step: null,
       status: 'divergent',
-      color: '#ec4899', // pink/magenta
+      color: '#ec4899',
       parameter_deltas: {
         coercion_damping: `+${coercionDamping.toFixed(2)}`,
         cognitive_variance: `+${cognitiveVariance.toFixed(2)}`,
@@ -106,24 +106,40 @@ export const CounterfactualSandboxModal: React.FC<CounterfactualSandboxModalProp
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
-      <div className="relative w-full max-w-xl rounded-2xl border border-cyan-500/40 bg-slate-900 p-6 shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-fade-in">
+      <div className={`relative w-full max-w-xl rounded-2xl border p-6 shadow-2xl transition-colors ${
+        isLight
+          ? 'bg-white border-cyan-300 text-slate-900 shadow-cyan-900/10'
+          : 'bg-slate-900 border-cyan-500/40 text-slate-100 shadow-2xl'
+      }`}>
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-1.5 rounded-lg text-slate-400 hover:text-slate-100 hover:bg-slate-800 transition-colors cursor-pointer"
+          className={`absolute top-4 right-4 p-1.5 rounded-lg transition-colors cursor-pointer ${
+            isLight
+              ? 'text-slate-400 hover:text-slate-900 hover:bg-slate-100'
+              : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800'
+          }`}
         >
           <X className="w-5 h-5" />
         </button>
 
         <div className="flex items-start gap-3 mb-5">
-          <div className="p-3 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-400">
+          <div className={`p-3 rounded-xl border ${
+            isLight
+              ? 'bg-cyan-50 border-cyan-300 text-cyan-700'
+              : 'bg-cyan-500/10 border-cyan-500/30 text-cyan-400'
+          }`}>
             <GitFork className="w-6 h-6" />
           </div>
           <div>
-            <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-cyan-950 border border-cyan-500/50 text-cyan-300">
+            <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold border ${
+              isLight
+                ? 'bg-cyan-100 border-cyan-300 text-cyan-900'
+                : 'bg-cyan-950 border-cyan-500/50 text-cyan-300'
+            }`}>
               COUNTERFACTUAL WHAT-IF SANDBOX
             </span>
-            <h2 className="text-xl font-bold text-slate-100 font-sans mt-0.5">
+            <h2 className={`text-xl font-bold font-sans mt-0.5 ${isLight ? 'text-slate-900' : 'text-slate-100'}`}>
               Fork Simulated World & Test Convergence
             </h2>
           </div>
@@ -132,11 +148,17 @@ export const CounterfactualSandboxModal: React.FC<CounterfactualSandboxModalProp
         <div className="space-y-4 text-xs font-mono">
           {/* Parent branch selection */}
           <div>
-            <label className="block text-slate-300 mb-1">Parent Branch Origin</label>
+            <label className={`block mb-1 font-semibold ${isLight ? 'text-slate-700' : 'text-slate-300'}`}>
+              Parent Branch Origin
+            </label>
             <select
               value={parentBranchId}
               onChange={e => setParentBranchId(e.target.value)}
-              className="w-full p-2.5 rounded-lg bg-slate-950 border border-slate-800 text-slate-200 text-xs focus:border-cyan-500 focus:outline-none"
+              className={`w-full p-2.5 rounded-lg border text-xs focus:border-cyan-500 focus:outline-none ${
+                isLight
+                  ? 'bg-slate-50 border-slate-300 text-slate-800'
+                  : 'bg-slate-950 border-slate-800 text-slate-200'
+              }`}
             >
               {branches.map(b => (
                 <option key={b.branch_id} value={b.branch_id}>
@@ -148,20 +170,26 @@ export const CounterfactualSandboxModal: React.FC<CounterfactualSandboxModalProp
 
           {/* Branch Name */}
           <div>
-            <label className="block text-slate-300 mb-1">New Branch Name</label>
+            <label className={`block mb-1 font-semibold ${isLight ? 'text-slate-700' : 'text-slate-300'}`}>
+              New Branch Name
+            </label>
             <input
               type="text"
               value={branchName}
               onChange={e => setBranchName(e.target.value)}
-              className="w-full p-2 rounded-lg bg-slate-950 border border-slate-800 text-slate-200 text-xs focus:border-cyan-500 focus:outline-none"
+              className={`w-full p-2 rounded-lg border text-xs focus:border-cyan-500 focus:outline-none ${
+                isLight
+                  ? 'bg-slate-50 border-slate-300 text-slate-800'
+                  : 'bg-slate-950 border-slate-800 text-slate-200'
+              }`}
             />
           </div>
 
           {/* Bifurcation Step */}
           <div>
-            <div className="flex justify-between text-slate-300 mb-1">
+            <div className={`flex justify-between mb-1 font-semibold ${isLight ? 'text-slate-700' : 'text-slate-300'}`}>
               <span>Bifurcation Origin Step</span>
-              <span className="text-cyan-400 font-bold">T={bifurcationStep}</span>
+              <span className={isLight ? 'text-cyan-700 font-bold' : 'text-cyan-400 font-bold'}>T={bifurcationStep}</span>
             </div>
             <input
               type="range"
@@ -170,20 +198,24 @@ export const CounterfactualSandboxModal: React.FC<CounterfactualSandboxModalProp
               step={50}
               value={bifurcationStep}
               onChange={e => setBifurcationStep(parseInt(e.target.value, 10))}
-              className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-cyan-400"
+              className={`w-full h-2 rounded-lg appearance-none cursor-pointer accent-cyan-500 ${
+                isLight ? 'bg-slate-200' : 'bg-slate-800'
+              }`}
             />
           </div>
 
           {/* Parameter Sliders */}
-          <div className="p-3 rounded-lg bg-slate-950 border border-slate-800 space-y-3">
-            <span className="text-slate-300 font-semibold uppercase text-[11px] block">
+          <div className={`p-3 rounded-lg border space-y-3 ${
+            isLight ? 'bg-slate-50 border-slate-200' : 'bg-slate-950 border-slate-800'
+          }`}>
+            <span className={`font-semibold uppercase text-[11px] block ${isLight ? 'text-slate-800' : 'text-slate-300'}`}>
               Parameter Perturbations (Deltas)
             </span>
 
             <div>
-              <div className="flex justify-between text-slate-400 mb-1 text-[11px]">
+              <div className={`flex justify-between mb-1 text-[11px] ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
                 <span>Coercion Damping</span>
-                <span className="text-cyan-300">+{coercionDamping.toFixed(2)}</span>
+                <span className={isLight ? 'text-cyan-700 font-bold' : 'text-cyan-300'}>+{coercionDamping.toFixed(2)}</span>
               </div>
               <input
                 type="range"
@@ -192,14 +224,14 @@ export const CounterfactualSandboxModal: React.FC<CounterfactualSandboxModalProp
                 step={0.05}
                 value={coercionDamping}
                 onChange={e => setCoercionDamping(parseFloat(e.target.value))}
-                className="w-full h-1.5 bg-slate-800 rounded cursor-pointer accent-cyan-400"
+                className={`w-full h-1.5 rounded cursor-pointer accent-cyan-500 ${isLight ? 'bg-slate-200' : 'bg-slate-800'}`}
               />
             </div>
 
             <div>
-              <div className="flex justify-between text-slate-400 mb-1 text-[11px]">
+              <div className={`flex justify-between mb-1 text-[11px] ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
                 <span>Cognitive Variance</span>
-                <span className="text-cyan-300">+{cognitiveVariance.toFixed(2)}</span>
+                <span className={isLight ? 'text-cyan-700 font-bold' : 'text-cyan-300'}>+{cognitiveVariance.toFixed(2)}</span>
               </div>
               <input
                 type="range"
@@ -208,14 +240,14 @@ export const CounterfactualSandboxModal: React.FC<CounterfactualSandboxModalProp
                 step={0.05}
                 value={cognitiveVariance}
                 onChange={e => setCognitiveVariance(parseFloat(e.target.value))}
-                className="w-full h-1.5 bg-slate-800 rounded cursor-pointer accent-cyan-400"
+                className={`w-full h-1.5 rounded cursor-pointer accent-cyan-500 ${isLight ? 'bg-slate-200' : 'bg-slate-800'}`}
               />
             </div>
 
             <div>
-              <div className="flex justify-between text-slate-400 mb-1 text-[11px]">
+              <div className={`flex justify-between mb-1 text-[11px] ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
                 <span>Hierarchical Locking</span>
-                <span className="text-purple-300">{hierarchicalLocking.toFixed(2)}</span>
+                <span className={isLight ? 'text-purple-700 font-bold' : 'text-purple-300'}>{hierarchicalLocking.toFixed(2)}</span>
               </div>
               <input
                 type="range"
@@ -224,7 +256,7 @@ export const CounterfactualSandboxModal: React.FC<CounterfactualSandboxModalProp
                 step={0.05}
                 value={hierarchicalLocking}
                 onChange={e => setHierarchicalLocking(parseFloat(e.target.value))}
-                className="w-full h-1.5 bg-slate-800 rounded cursor-pointer accent-purple-400"
+                className={`w-full h-1.5 rounded cursor-pointer accent-purple-500 ${isLight ? 'bg-slate-200' : 'bg-slate-800'}`}
               />
             </div>
           </div>
@@ -233,7 +265,11 @@ export const CounterfactualSandboxModal: React.FC<CounterfactualSandboxModalProp
         <div className="mt-5 flex items-center justify-end gap-2">
           <button
             onClick={onClose}
-            className="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-mono text-xs cursor-pointer"
+            className={`px-4 py-2 rounded-lg font-mono text-xs cursor-pointer transition-colors ${
+              isLight
+                ? 'bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300'
+                : 'bg-slate-800 hover:bg-slate-700 text-slate-300'
+            }`}
           >
             Cancel
           </button>
